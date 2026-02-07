@@ -40,20 +40,20 @@ def load_data():
     valid_sales = df[df['주문-취소 수량'] > 0].copy()
     
     # Derived Columns
-    if '광역지역' in df.columns:
-        df['RegionGroup'] = df['광역지역'].apply(lambda x: '서울' if '서울' in str(x) else '비서울')
+    if '광역지역' in valid_sales.columns:
+        valid_sales['RegionGroup'] = valid_sales['광역지역'].apply(lambda x: '서울' if '서울' in str(x) else '비서울')
         
     # Month for Lifecycle
-    if '주문일' in df.columns:
-        df['YearMonth'] = df['주문일'].dt.to_period('M').astype(str)
+    if '주문일' in valid_sales.columns:
+        valid_sales['YearMonth'] = valid_sales['주문일'].dt.to_period('M').astype(str)
 
     # Keywords Extraction (Simple)
-    if '상품명' in df.columns:
+    if '상품명' in valid_sales.columns:
         def extract_keywords(text):
             # Extract distinct words, remove numbers/symbols
             words = re.findall(r'[가-힣]+', str(text))
             return words
-        df['Keywords'] = df['상품명'].apply(extract_keywords)
+        valid_sales['Keywords'] = valid_sales['상품명'].apply(extract_keywords)
 
     return valid_sales
 
