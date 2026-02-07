@@ -67,7 +67,7 @@ def main():
         
     # Sidebar Navigation
     st.sidebar.header("네비게이션")
-    page = st.sidebar.radio("이동:", ["홈 (개요)", "상세 분석", "교차 분석 (Drill Down)"])
+    page = st.sidebar.radio("이동:", ["홈 (개요)", "상세 분석", "교차 분석 (Drill Down)", "EDA 보고서"])
     
     if page == "홈 (개요)":
         render_home(df)
@@ -75,6 +75,16 @@ def main():
         render_details(df)
     elif page == "교차 분석 (Drill Down)":
         render_cross_analysis(df)
+    elif page == "EDA 보고서":
+        render_report()
+
+def render_report():
+    try:
+        with open("reports/EDA_Report.md", "r", encoding="utf-8") as f:
+            report_content = f.read()
+        st.markdown(report_content)
+    except FileNotFoundError:
+        st.error("보고서 파일을 찾을 수 없습니다. (reports/EDA_Report.md)")
 
 def render_home(df):
     st.header("경영 요약 (Executive Summary)")
