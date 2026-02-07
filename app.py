@@ -35,11 +35,7 @@ def load_data():
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors='coerce')
     
-    # Net Profit
-    if {'판매단가', '공급단가', '주문-취소 수량'}.issubset(df.columns):
-        df['NetProfit'] = (df['판매단가'] - df['공급단가']) * df['주문-취소 수량']
-    else:
-        df['NetProfit'] = 0
+
 
     valid_sales = df[df['주문-취소 수량'] > 0].copy()
     
@@ -86,14 +82,12 @@ def render_home(df):
     # KPIs
     total_sales = df['실결제 금액'].sum()
     total_orders = df['주문-취소 수량'].sum()
-    total_profit = df['NetProfit'].sum()
     avg_price = df['판매단가'].mean()
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     col1.metric("총 매출", f"₩{total_sales:,.0f}")
     col2.metric("총 주문량", f"{total_orders:,.0f}")
-    col3.metric("순이익", f"₩{total_profit:,.0f}")
-    col4.metric("평균 단가", f"₩{avg_price:,.0f}")
+    col3.metric("평균 단가", f"₩{avg_price:,.0f}")
     
     st.markdown("---")
     
@@ -155,18 +149,12 @@ def render_details(df):
     with tab3:
         st.subheader("이벤트 효율 분석")
         if '이벤트 여부' in df.columns:
-            event_stats = df.groupby('이벤트 여부')[['실결제 금액', 'NetProfit']].sum().reset_index()
-            event_stats['ProfitMargin'] = (event_stats['NetProfit'] / event_stats['실결제 금액'] * 100).round(1)
+            event_stats = df.groupby('이벤트 여부')[['실결제 금액']].sum().reset_index()
             
-            c1, c2 = st.columns(2)
-            with c1:
-                fig_event_sales = px.pie(event_stats, values='실결제 금액', names='이벤트 여부', title="이벤트 여부별 매출 비중")
-                st.plotly_chart(fig_event_sales, use_container_width=True)
-            with c2:
-                fig_event_margin = px.bar(event_stats, x='이벤트 여부', y='ProfitMargin', title="이벤트 여부별 순이익률 (%)", text_auto=True)
-                st.plotly_chart(fig_event_margin, use_container_width=True)
+            fig_event_sales = px.pie(event_stats, values='실결제 금액', names='이벤트 여부', title="이벤트 여부별 매출 비중")
+            st.plotly_chart(fig_event_sales, use_container_width=True)
                 
-            st.success("💡 **인사이트**: 이벤트 상품은 마진율이 높고 매출 기여도가 큽니다. 비이벤트 상품은 적자 판매 우려가 있습니다.")
+            st.success("💡 **인사이트**: 이벤트 상품의 매출 기여도를 확인하세요.")
         else:
             st.info("'이벤트 여부' 컬럼이 없습니다.")
 
